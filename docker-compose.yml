@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: autotask
+      POSTGRES_PASSWORD: autotask
+      POSTGRES_DB: autotask
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - postgres:/var/lib/postgresql/data
+    # networks:
+    #   - postgres
