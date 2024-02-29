@@ -1,5 +1,7 @@
+'use server'
 import { Task } from '@prisma/client'
 import prisma from './db'
+import { revalidatePath } from 'next/cache'
 
 export const getAllTasks = async () => {
   try {
@@ -10,43 +12,65 @@ export const getAllTasks = async () => {
   }
 }
 
-export const createTask = async (data: Task) => {
+export const createTask = async (formData: FormData) => {
+  const content = formData.get('content') as string
   try {
-    const task = await prisma.task.create({
+    await prisma.task.create({
       data: {
-        ...data,
+        content,
       },
     })
-    return task
+    revalidatePath('/')
   } catch (error) {
     console.log(error)
   }
 }
 
-export const updateTask = async (id: string, data: Task) => {
+export const updateTaskStatus = async (id: number) => {
   try {
-    const task = await prisma.task.update({
+    const currentStatus = await prisma.task.findUnique({ where: { id } })
+    const status = !currentStatus?.status
+
+    await prisma.task.update({
       where: {
         id,
       },
       data: {
-        ...data,
+        status,
       },
     })
-    return task
+    revalidatePath('/')
   } catch (error) {
     console.log(error)
   }
 }
 
-export const deleteTask = async (id: string) => {
+export const updateTask = async (id: number, formData: FormData) => {
+  const currentStatus = await prisma.task.findUnique({ where: { id } })
+  const content = formData.get('content') as string
   try {
-    const task = await prisma.task.delete({
+    await prisma.task.update({
+      where: {
+        id,
+      },
+      data: {
+        content,
+      },
+    })
+    revalidatePath('/')
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const deleteTask = async (id: number) => {
+  try {
+    await prisma.task.delete({
       where: {
         id,
       },
     })
-    return task
+    revalidatePath('/')
   } catch (error) {
     console.log(error)
   }
