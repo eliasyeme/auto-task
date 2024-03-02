@@ -3,6 +3,50 @@ import { Task } from '@prisma/client'
 import prisma from './db'
 import { revalidatePath } from 'next/cache'
 
+export const createProject = async (formData: FormData) => {
+  const title = formData.get('title') as string
+  await prisma.project.create({
+    data: {
+      title,
+    },
+  })
+  revalidatePath('/projects')
+}
+
+export const getAllProjects = async () => {
+  const projects = await prisma.project.findMany()
+  return projects
+}
+
+export const getAllTaskByProjectId = async (id: string) => {
+  const tasks = await prisma.task.findMany({
+    where: { projectId: id },
+  })
+  return tasks
+}
+
+export const updateProject = async (id: string, formData: FormData) => {
+  'use server'
+  const title = formData.get('title')?.toString()
+  await prisma.project.update({
+    where: { id },
+    data: {
+      title,
+    },
+  })
+  revalidatePath(`/projects/${id}`)
+}
+
+export const deleteProject = async (id: string) => {
+  await prisma.project.delete({ where: { id } })
+  revalidatePath('/projects')
+}
+
+export const deleteProjectAndRevalidate = async (id: string, path: string) => {
+  await prisma.project.delete({ where: { id } })
+  revalidatePath(path)
+}
+
 export const getAllTasks = async () => {
   try {
     const tasks = await prisma.task.findMany()
@@ -12,21 +56,22 @@ export const getAllTasks = async () => {
   }
 }
 
-export const createTask = async (formData: FormData) => {
+export const createTask = async (projectId: string, formData: FormData) => {
   const content = formData.get('content') as string
   try {
     await prisma.task.create({
       data: {
         content,
+        project: { connect: { id: projectId } },
       },
     })
-    revalidatePath('/')
+    revalidatePath(`/projects/${projectId}`)
   } catch (error) {
     console.log(error)
   }
 }
 
-export const updateTaskStatus = async (id: number) => {
+export const updateTaskStatus = async (id: string) => {
   try {
     const currentStatus = await prisma.task.findUnique({ where: { id } })
     const status = !currentStatus?.status
@@ -45,7 +90,7 @@ export const updateTaskStatus = async (id: number) => {
   }
 }
 
-export const updateTask = async (id: number, formData: FormData) => {
+export const updateTask = async (id: string, formData: FormData) => {
   const currentStatus = await prisma.task.findUnique({ where: { id } })
   const content = formData.get('content') as string
   try {
@@ -63,7 +108,7 @@ export const updateTask = async (id: number, formData: FormData) => {
   }
 }
 
-export const deleteTask = async (id: number) => {
+export const deleteTask = async (id: string) => {
   try {
     await prisma.task.delete({
       where: {

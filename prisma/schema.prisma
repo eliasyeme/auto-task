@@ -15,10 +15,23 @@ datasource db {
   // url      = env("DATABASE_URL")
 }
 
-model Task {
-  id        Int      @id @default(autoincrement())
-  content   String
-  status    Boolean  @default(false)
+model Project {
+  // id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  title String
+  tasks Task[]
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content   String
+  status    Boolean @default(false)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 }
