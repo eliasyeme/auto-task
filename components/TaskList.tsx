@@ -1,10 +1,12 @@
 import TaskItem from './Task'
-import { getAllTasks } from '@/lib/actions'
+import { getAllTaskByProjectId, getAllTasks } from '@/lib/actions'
 
-const TodoList = async () => {
-  const tasks = await getAllTasks()
+const TodoList = async ({ id }: { id: number }) => {
+  const tasks = await getAllTaskByProjectId(id)
   return (
-    <ul>{tasks?.map((task) => <TaskItem task={task} key={task.content} />)}</ul>
+    <ul className="flex flex-col gap-y-2">
+      {tasks?.map((task) => <TaskItem task={task} key={task.content} />)}
+    </ul>
   )
 }
 
