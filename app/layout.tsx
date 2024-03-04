@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import clsx from 'clsx'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,7 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={clsx('h-screen w-screen', inter.className)}>
-        {children}
+        <div>
+          <nav className="flex h-min bg-slate-100 p-4">
+            <Link href="/">Auto-Task</Link>
+          </nav>
+          {children}
+        </div>
       </body>
     </html>
   )

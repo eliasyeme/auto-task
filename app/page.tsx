@@ -1,12 +1,10 @@
-import TaskForm from '@/components/TaskForm'
-import TaskList from '@/components/TaskList'
+import Link from 'next/link'
 
 export default function Home() {
   return (
     <div>
-      <h1>Main page</h1>
-      <TaskForm />
-      <TaskList />
+      <h1>Let AI help you generate your task today</h1>
+      <Link href="/projects">Get started</Link>
     </div>
   )
 }

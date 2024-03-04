@@ -71,6 +71,17 @@ export const createTask = async (projectId: string, formData: FormData) => {
   }
 }
 
+export const createManyTask = async (id: string, tasks: string[]) => {
+  await prisma.$transaction(
+    tasks.map((content) =>
+      prisma.task.create({
+        data: { content, project: { connect: { id } } },
+      }),
+    ),
+  )
+  revalidatePath(`/projects/${id}`)
+}
+
 export const updateTaskStatus = async (id: string) => {
   try {
     const currentStatus = await prisma.task.findUnique({ where: { id } })
