@@ -1,10 +1,14 @@
 'use client'
-import { createTask } from '@/lib/actions'
+import { createManyTask, createTask } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { FormEvent } from 'react'
+import { FormEvent, useRef } from 'react'
+import { z } from 'zod'
+import { generateTodoList } from '@/lib/ai'
 
 export default function TaskForm({ id }: { id: string }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (event.target instanceof HTMLFormElement) {
@@ -13,15 +17,30 @@ export default function TaskForm({ id }: { id: string }) {
       event.target.reset()
     }
   }
+  async function handleClick() {
+    const checkInput = z.string().min(2)
+    const input = checkInput.safeParse(inputRef.current?.value)
+    if (input.success) {
+      const taskList = await generateTodoList(input.data)
+      await createManyTask(id, taskList.data)
+    } else {
+      console.log(input.error.errors[0].message)
+    }
+  }
   return (
     <div>
       <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col gap-y-2">
-        <Input name="content" type="text" placeholder="Task" />
+        <Input ref={inputRef} name="content" type="text" placeholder="Task" />
         <div className="flex gap-2">
           <Button variant="default" type="submit" className="w-full">
             Add
           </Button>
-          <Button variant="outline" type="button" disabled className="w-full">
+          <Button
+            onClick={handleClick}
+            variant="outline"
+            type="button"
+            className="w-full"
+          >
             Generate
           </Button>
         </div>
